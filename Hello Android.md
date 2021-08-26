@@ -49,7 +49,7 @@
 
    
 
-   <img src="E:\markdown\Typora files\activity life span.jpg" alt="alt " style="zoom: 33%;" />
+   <img src="pic/activity life span.jpg" alt="alt " style="zoom: 33%;" />
 
    其中：
 
@@ -96,13 +96,13 @@
 
      
 
-     <img src="E:\markdown\Typora files\fragment-view-lifecycle.png" alt="alt " style="zoom: 67%;" />
+     <img src="pic/fragment-view-lifecycle.png" alt="alt " style="zoom: 67%;" />
 
      
 
 ### 数据库存储 ROOM
 
-<img src="E:\markdown\Typora files\room_architecture.png" alt="alt " style="zoom:50%;" />
+<img src="pic/room_architecture.png" alt="alt " style="zoom:50%;" />
 
 1. 使用流程：
    1. 将 model 定义为实体类，model 的每个属性都是表头(字段)
