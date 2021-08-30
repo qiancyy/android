@@ -69,7 +69,7 @@
 ​	需由 Activity 托管，放置在 Activity 的视图层级中，本质上，Fragment 是作为一种特殊的 UI 片段（因为具有和 Activity 一样可以实现逻辑的功能，
 
 ​	Fragment 显示的两种方式：
-		1. 静态：在 Activity 的 xml 中添加`<fragment />` 用`android:name`指代 自定义的 Fragment 类
+​		1. 静态：在 Activity 的 xml 中添加`<fragment />` 用`android:name`指代 自定义的 Fragment 类
   		2. 动态显示
 
 * **流程（动态）**：
@@ -164,3 +164,24 @@
    			3. `LocalBroadcastManager.sendBroadcast(Intent)` 广播发送给与发送器位于同一应用中的接收器
 
    方式1、2可以携带`Manifest.permission.`加入权限
+
+
+
+
+
+## Material Design
+
+
+
+
+
+
+
+
+
+
+
+## 属性动画
+
+
+
