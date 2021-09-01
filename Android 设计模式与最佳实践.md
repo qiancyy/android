@@ -1,6 +1,6 @@
 # Android 设计模式与最佳实践
 
-schedule to read 8.26-9.6
+schedule to read 8.26-9.1
 
 tag 8.26
 
@@ -203,4 +203,151 @@ fun main(){
 ## 建造者模式
 
 1. 用途：小对象构建大对象
-2. 
+
+   
+
+
+
+## 组合模式
+
+1. 用途：通过可能完全相同的代码处理单个组件或者组件的集合，从而完成层次的构建
+2. 核心在于对于集合组件的处理，实现的是视图结构的复用：
+
+``` kotlin
+interface Component{
+    fun add(component:Component)
+    fun inflate()
+}
+
+class Leaf(var name:String):Component{
+    override fun add(component: Component) {
+    }
+
+    override fun inflate() {
+        println(name)
+    }
+}
+class Composite(var name:String):Component{
+    var list=ArrayList<Component>()
+    override fun add(component: Component) {
+        list.add(component)
+    }
+
+    override fun inflate() {
+        for(component in list){
+            component.inflate()
+        }
+    }
+}
+class Builder{
+    val single1=Leaf("single1")
+    val single2=Leaf("single2")
+    val single3=Leaf("single3")
+    fun layout1():Component{
+        val composite1=Composite("conmposite1")
+        composite1.add(single1)
+        composite1.add(single2)
+        return composite1
+    }
+    fun layout2():Component{
+        val composite2=Composite("conmposite2")
+        composite2.add(layout1())
+        composite2.add(single3)
+        return composite2
+    }
+}
+fun main(){
+    Builder().layout1().inflate()
+    Builder().layout2().inflate()
+}
+
+```
+
+
+
+## 观察者模式
+
+1. 核心：主体接口，观察者接口
+
+2. 观察者接口干什么：定义我的响应方法 ；取消注册的逻辑
+
+   主题接口干什么：1. 注册/取消注册观察者实例（列表）的方法定义 2. 通知观察者 
+
+3. 实例：主体类：observable 接口类：observer
+
+
+
+## 行为型模式
+
+1. 访问者模式：
+
+   可以将进程用于一组不相关的对象，而不必去担心对象差异
+
+   优势：访问者和访问者至今啊完全独立互不影响
+
+```kotlin
+各类商品具有接收访问者访问的功能 accept(visitor)，我们把这个具有的功能封装成接口，将商品作为实现这个接口的实例； 收银台是访问者接口的一个具体实例，作为收银台，我们可以去访问商品
+interface Item{
+    fun accept(visitor:Visitor):Double
+}
+class Can(var name:String,var price:Double):Item{
+    override fun accept(visitor: Visitor):Double {
+        return visitor.visit(this)
+    }
+}
+class Bread(var name:String,var price:Double):Item {
+    override fun accept(visitor: Visitor): Double {
+        return visitor.visit(this)
+    }
+}
+interface Visitor{
+    fun visit(can: Can):Double
+    fun visit(bread: Bread):Double
+}
+class Checkout:Visitor{
+    override fun visit(can: Can): Double {
+        println(can.name)
+        return can.price
+    }
+
+    override fun visit(bread: Bread): Double {
+        println(bread.name)
+        return bread.price
+    }
+}
+fun getPrice(lists:ArrayList<Item>):Double{
+    var checkout=Checkout()
+    var sum:Double=0.0
+    for(item in lists){
+        sum+=item.accept(checkout)
+    }
+    return sum
+}
+fun main(){
+    var list= arrayListOf<Item>(Can("fishCan",18.2),Bread("raw Bread",29.0))
+    println(getPrice(list))
+}
+```
+
+2. 状态模式:
+
+   有限状态机的实现：A----------->B（with the input of a）
+
+   ``` kotlin
+   interface Status{
+       fun excute(context:Context,input:String)
+   }
+   //define two statuses A,B that inplement the status interface, implement the excute function depending on the input parameter.
+   class Context(var state: Status){
+    	 fun excute(context:Context,input:String){
+            status.excute(this,input)
+        }
+   }
+   fun main(){
+       var context=Context(A())
+       context.excute(input) //实际调用的是A()的excute
+   }
+   ```
+
+   
+

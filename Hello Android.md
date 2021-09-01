@@ -149,23 +149,53 @@
 
 1. 接收广播：
 
-   方法1：xml 文件中静态注册 `<receiver>` 指定接收的 intent => 实现在注册中的 `BroadcastReceiver()`的继承类，重载接收到广播的逻辑
+   方法1：xml 文件中静态注册 `<receiver>` ,**开机启动**，在静态注册 `<receiver>`中传入`android:name=继承类的地址(可省略).继承类名`,同时通过`<intent-filter>`指定响应的action；在继承类中重载接收到广播的逻辑
 
-   方法2： 上下文注册，只要应用在运行，就会收到广播：调用`registerReceiver(BroadcastReceiver, IntentFilter)` 来注册接收器：`unregisterReceiver(android.content.BroadcastReceiver)`注销接收器
+   方法2： 上下文注册，只要**应用在运行**，就会收到广播：得到重载了`onReceive()`的 `BroadcastReceiver()`的继承类对象，传入`registerReceiver(BroadcastReceiver, IntentFilter)` 来注册接收器，`IntentFilter`是指这个`reciever`想要监听什么类型的广播，就在这里通过action指定
 
-   在接收广播（`onReceive()`）过程中,整个进程被认为使前台进程，在`onReceive()` 执行完毕后，系统会将其进程视为低优先级进程，随时可能终止进程来回收内存，要执行长时间运行的工作
+   `unregisterReceiver(android.content.BroadcastReceiver)`注销接收器
+
+   **注意注意：**在接收广播（`onReceive()`）过程中,整个进程被认为使前台进程，在`onReceive()` 执行完毕后，系统会将其进程视为低优先级进程，随时可能终止进程来回收内存，所以一般不允许执行耗时工作要执行长时间运行的工作
 
 2. 发送广播：
 
    广播三种方式：
 
-   			1. `sendOrderedBroadcast(Intent, String)`顺序接收中途可以终止
-   			2.  `sendBroadcast(Intent)`常规广播
-   			3. `LocalBroadcastManager.sendBroadcast(Intent)` 广播发送给与发送器位于同一应用中的接收器
+     		1. `sendOrderedBroadcast(Intent, String)`顺序接收中途可以终止: 通过设置`<intent-filter >`的android:priority 属性，我们可以决定接受的顺序，可以通过`abortBroadcast()`截止
+     		2. `sendBroadcast(Intent)`常规广播
+     		3. `LocalBroadcastManager.sendBroadcast(Intent)` 广播发送给与发送器位于同一应用中的接收器
 
-   方式1、2可以携带`Manifest.permission.`加入权限
+   所有的自定义广播都默认是隐式广播，而当我们静态注册的时候，需要指定Intent的包名，从而转为显式，不然reciever无法接收
 
+   
 
+   方式1、2可以携带`Manifest.permission.`加入权限,成为带权限的发送
+
+   关于permission，有
+
+   1. uses-permission是申请权限；
+
+   2. permission是自己定义权限；
+
+   3. android组件中的permission指明调用这个组件需要的权限
+   4. 带权限的发送：如果发送的broadcast带有permission，那么只有在那些manifest文件中包含了<uses-permission>的receiver才能够接受到；带权限的接收：在注册广播接收器时指定了权限参数(android:permission)
+
+   ``` kotlin
+   <receiver android:name=".MyBroadcastReceiver"
+                 android:permission="android.permission.SEND_SMS">
+   或者
+   var filter = IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+   registerReceiver(receiver, filter, Manifest.permission.SEND_SMS, null )
+       
+   ```
+
+   那么，发送方应用必须请求如下权限，才能向这些接收器发送广播
+
+   ``` kotlin
+   <uses-permission android:name="android.permission.SEND_SMS"/>
+   ```
+
+   这两个有互相牵制的味道
 
 
 
@@ -185,3 +215,23 @@
 
 
 
+SharedPerformance:
+
+在onPause() 或者 onStop() 存储，因为onDestroy不总是被调用，在onCreate()中 get
+
+使用：通过 applicationContext 得到 SharedPredference并传入 name 参数，调用edit()得到 editor putString()放入键值对，调用apply() 后台执行
+
+
+
+###  通知（Notification）:
+
+1. **使用场景**：应用程序运行在后台，在信息**不能等到**用户下次登陆时显示（有时效性？），才发出通知
+
+2. 功能：锁屏显示?; 通过通知启动新的活动
+3. 通知渠道：一个应用可以具有多个通知渠道，而这个渠道的控制权掌握在用户的手中
+
+
+
+服务：
+
+顶级组件

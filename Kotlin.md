@@ -12,36 +12,64 @@
 
 ## Class:
 
-1. 一个类可以有一个**主构造函数**以及一个或多个**次构造函数**，主构造函数没有任何注解或者可见性修饰符，可以省略这个 *constructor* 关键字，进而使用简洁的写法,次构造函数需要委托给主构造函数， 可以直接委托或者通过别的次构造函数间接委托,用`this` 即可调用次构造或者主构造; 初始构造块`init{}`用于实现主构造的逻辑与属性初始化器交织
+1. 一个类可以有一个**主构造函数**以及一个或多个**次构造函数**，主构造函数没有任何注解或者可见性修饰符，可以省略这个 *constructor* 关键字，进而使用简洁的写法,次构造函数需要委托给主构造函数， 可以直接委托或者通过别的次构造函数间接委托,用`this` 即可调用次构造或者主构造; 初始构造块`init{}`用于实现**主**构造的逻辑与属性初始化器交织
 
-2. 默认情况类为final，若要可继承：`open`，对于抽象类默认是`open`
+2. 继承与重写：
+
+   1. kotlin 遵循默认关闭（closed）的原则，对应java 为final，若要可继承：`open`，对于抽象类默认是`open`
+
+   2. 接口：**最高级别的抽象**
+
+      接口可以有默认的方法实现，可以包含属性，但是属性没有`field`字段，这就意味着不具有状态，只能只读;那些没有方法体的方法都是隐式的abstract，有方法体的以及属性是隐式的open,意味着所有都可以被重写.
+
+   3. 抽象类：**次高**级别的抽象
+
+      和接口的区别在于可以包含具体的实现并且可以携带**状态**
 
 3. 派生类有主构造，必须初始化基类的构造函数，若没有，但是派生类想使用次构造,需要使用`super()`初始化基类,在重载的时候，如果要调用基类的方法，采用`super.funcionName()`,特殊的，当内部类中访问外部类的超类`super@Outer.funcionName()`,多继承的时候如果调用基类方法冲突，采用`super<baseName>.functionName()`的方式
 
-   -----------------------------------------------------------------------
-
-4. interface: 接口可以既包含抽象方法的声明也包含实现。与抽象类不同的是，接口无法保存状态
-
-   ------------------------------------------------------------------
-
-5. 可见性修饰符:有这四个可见性修饰符：`private`、 `protected`、 `internal` 和 `public`
+4. **可见性**修饰符:有这四个可见性修饰符：`private`、 `protected`、 `internal`(类似于包模块的可见性) 和 `public`
 
    ### data class:
 
    1. 数据类不能是抽象、开放、密封或者内部的,换言之，抽象类不能继承
-   2. 自动实现了对成员的`setter` & `getter`
-   3. `hashCode`，`toString`和`equals`方法仅对数据类的**构造函数参数**起作用
-   
+   3. `hashCode`，`toString`和`equals`方法仅对数据类的**构造函数参数**起作用可以按照预想的按照值去判断工作，除此之外还自动生成了copy以及解构的`componentN`方法(和python 很像)`val (para1,para2, _)=obj1` 把obj的属性拆分出来不需要的使用下划线代替
+
    ### Inner class:
-   
-   1. Inner class 使用关键词 inner表示持有对外部类的引用,所以可以调用外部的变量和方法
-   2. anonymous inner class: 
+
+   1. Inner class 使用关键词 **inner**表示持有对外部类的引用,所以可以调用外部的变量和方法，这很重要。而嵌套类需要持有外部类的一个实例
+
+      ```kotlin
+      class outer{
+          var outName:String="out"
+          inner class INner{
+              outName="inner"
+      	}
+      }
+      ```
+
+      
 
 
 
 ## Object
 
-1. 对象表达式：”只是需要一个对象而已“，和 inner class 一样，可以访问来自包含它的作用域的变量
+1. 对象表达式：”只是需要一个对象而已“，和 inner class 一样，可以访问来自包含它的作用域的变量 动态创建一个对象
+
+   对象表达式的功能强大，可以重写某些成员的同时创建对象，这就使得这个对象变得像类一样。
+
+   ``` kotlin
+   setListener(object:Listener{
+       override fun onClick():Boolean{
+           
+       }
+   })
+   // 只有一个抽象方法的接口(SAM接口)，可以直接将parameter传入lambda表达式简化,不用写重载函数 例如 listener{
+   	view -> ...
+   }
+   ```
+
+   
 
    eg. 等式右边为一个对象表达式
 
@@ -50,7 +78,7 @@
        override val y = 15
    }
 
-2. 对象声明：
+2. 对象声明 (object + 对象名)：不能像对象表达式一样放在等式的右侧了
 
    1. 单例模式：
 
@@ -105,8 +133,13 @@
    Kotlin 标准库为几种有用的委托提供了工厂方法：
 
    1. [lazy()](https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/lazy.html) 
-   是接受一个 lambda 并返回一个 `Lazy <T>` 实例的函数，由于是接收一个参数，所以按照下面函数规则，可以直接将函数体放在{}中,保证了变量初始化一次，而不用自己去实现线程不安全的逻辑，因为lazy会在第一次get到值后执行lambda语句，并存储值，之后的get访问得到的直接是值而不执行语句。
-   2. 解析 JSON 或者做其他“动态”事情的应用中：
+     是接受一个 lambda 并返回一个 `Lazy <T>` 实例的函数，由于是接收一个参数，所以按照下面函数规则，可以直接将函数体放在{}中,保证了变量初始化一次，而不用自己去实现线程不安全的逻辑，因为lazy会在第一次get到值后执行lambda语句，并缓存，之后的get直接返回缓存的值。
+
+   2. Delegates.observable
+
+     传入一个初始值和一个用于监听变化的函数lambda
+
+   3. 解析 JSON 或者做其他“动态”事情的应用中：
 
    ``` kotlin
    class User(val map: Map<String, Any?>) {
@@ -335,3 +368,59 @@
    1. 扩展函数是在编译时运行（静态解析）而不是在运行时进行，所以不存在多态的情况
 
    
+
+8.31《kotlin 移动应用开发笔记》
+
+1. 类和对象的示例化：
+
+   ``` kotlin
+   //一般的语言的写法
+   class Task(title:String){
+       val t:String=title
+   }
+   //kotlin简化
+   class Task(var/val title:String){
+       //主构造函数加上val/var 修饰,就可以隐式的将这个参数作为类的属性
+   }
+   ```
+
+   值得注意的是，我们讨论的是属性（property，类与外部接口的组成成分，可以访问field），而不是字段（field，存储实际的数据），这就意味着，我们被允许通过setter和getter方法访问这个字段的值 val的属性自动有getter,var的属性自动有getter和setter，我们如果需要修改默认的get和set 可以通过`get()``set()`对field进行操作
+
+2. 进一步学习延迟初始化：
+
+   为什么要延迟初始化：
+
+   很多时候一个类中的对象都通过依赖注入的形式，由其他的类产生自己的对象
+
+   ``` kotlin
+   class Test{
+       lateinit var car:Car
+       fun setup{
+           car=CarFactory.car() //Re-initialize the property
+       }
+   }
+   ```
+
+   1. 如果想在使用前查看是否已被初始化,可在 Test 类中使用`this::car.isInitialized`（::是函数指针引用）
+
+3. 泛型函数的具体化：
+
+   使用场景：希望访问泛型函数的泛型类型参数，然而JVM规定类型擦除，这就导致在运行的时候参数类型不会保留，但是通过inline内联可以将具体类型参数内联到内联函数处，从而可以不被擦除
+
+   总之，原先类型信息::class.java不能够获得，需要通过反射，现在可以通过像泛型T一样去指定
+
+   ```kotlin
+   inline fun <refined T> Iterable<*>.filterByType():List<T>{
+       return this.filter{it is T}.map{it as T}
+   }
+   //call
+   List.filterByType<Int>()
+   ```
+
+4. 协变：对于只读集合子类型代替超类型，对于可变集合，无法协变，类型不安全
+
+   (待补充)
+
+5. 并发的补充：
+
+   1. 协程始终应该式非阻塞的，所以我们不能在协程中调用runBlocking,
